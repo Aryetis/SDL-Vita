@@ -21,6 +21,7 @@
 #include "../../SDL_internal.h"
 
 #if SDL_VIDEO_RENDER_VITA
+//#define SDL_VITA_UNIMPLEMENTED_LOGS
 
 #include "SDL_hints.h"
 #include "../SDL_sysrender.h"
@@ -40,7 +41,6 @@
 #define sceKernelDcacheWritebackAll() (void)0
 
 /* VITA renderer implementation, based on the vita2d lib  */
-
 
 extern int SDL_RecreateWindow(SDL_Window *window, Uint32 flags);
 
@@ -229,7 +229,9 @@ VITA_CreateRenderer(SDL_Window *window, Uint32 flags)
 static void
 VITA_WindowEvent(SDL_Renderer *renderer, const SDL_WindowEvent *event)
 {
-
+#ifdef SDL_VITA_UNIMPLEMENTED_LOGS
+    printf("SDL ERROR : VITA_WindowEvent not implemented \n");
+#endif
 }
 
 
@@ -329,14 +331,25 @@ VITA_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 static int
 VITA_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
 {
-
+#ifdef SDL_VITA_UNIMPLEMENTED_LOGS
+    printf("SDL ERROR : VITA_SetRenderTarget not implemented \n");
+#endif
 	return 0;
 }
 
 static int
 VITA_UpdateViewport(SDL_Renderer *renderer)
 {
+    int xScale = renderer->viewport.w>>1;
+    int yScale = renderer->viewport.h>>1;
+    sceGxmSetViewport(vita2d_get_context()
+                      ,renderer->viewport.x + xScale, xScale
+                      ,renderer->viewport.y + yScale + renderer->viewport.h, yScale
+                      ,1,1); // z doesn't matter as it's hardcoded to 0.5f in draw_texture_part_scale_generic()
 
+#ifdef SDL_VITA_UNIMPLEMENTED_LOGS
+    printf("SDL ERROR : VITA_UpdateViewport not implemented [INCOMING] \n");
+#endif
 	return 0;
 }
 
@@ -369,6 +382,9 @@ VITA_SetBlendMode(SDL_Renderer *renderer, int blendMode)
 		}
 		data->currentBlendMode = blendMode;
 	}*/
+#ifdef SDL_VITA_UNIMPLEMENTED_LOGS
+    printf("SDL ERROR : VITA_SetBlendMode not implemented \n");
+#endif
 }
 
 
@@ -464,11 +480,12 @@ static int
 VITA_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture,
 				const SDL_Rect *srcrect, const SDL_FRect *dstrect)
 {
-	VITA_TextureData *vita_texture = (VITA_TextureData *) texture->driverdata;
-	//float scaleX = dstrect->w > srcrect->w ? (float)(dstrect->w/srcrect->w) : 1;
-	//float scaleY = dstrect->h > srcrect->h ? (float)(dstrect->h/srcrect->h) : 1;
-	float scaleX = dstrect->w == srcrect->w ? 1 : (float)(dstrect->w/srcrect->w);
-	float scaleY = dstrect->h == srcrect->h ? 1 : (float)(dstrect->h/srcrect->h);
+    VITA_TextureData *vita_texture = (VITA_TextureData *) texture->driverdata;
+    float scaleX = dstrect->w > srcrect->w ? 2.0f*(float)(dstrect->w/srcrect->w) : 1;
+    float scaleY = dstrect->h > srcrect->h ? 2.0f*(float)(dstrect->h/srcrect->h) : 1;
+//    float scaleX = dstrect->w == srcrect->w ? 1 : ( dstrect->w > srcrect->w ? (float)2*(dstrect->w/srcrect->w) : (float) (srcrect->w/dstrect->w) );
+//    float scaleY = dstrect->h == srcrect->h ? 1 : ( dstrect->h > srcrect->h ? (float)2*(dstrect->h/srcrect->h) : (float) (srcrect->h/dstrect->h) );
+
 	Uint8 r, g, b, a;
     
 	SDL_GetTextureColorMod(texture, &r, &g, &b);
@@ -481,10 +498,10 @@ VITA_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture,
 	if(r == 255 && g == 255 && b == 255 && a == 255)
 	{
 		vita2d_draw_texture_part_scale(vita_texture->tex, dstrect->x, dstrect->y,
-			srcrect->x, srcrect->y, srcrect->w, srcrect->h, scaleX, scaleY);
+            srcrect->x, srcrect->y, srcrect->w, srcrect->h, scaleX, scaleY);
 	} else {
-		vita2d_draw_texture_tint_part_scale(vita_texture->tex, dstrect->x, dstrect->y,
-			srcrect->x, srcrect->y, srcrect->w, srcrect->h, scaleX, scaleY, (a << 24) + (b << 16) + (g << 8) + r);
+        vita2d_draw_texture_tint_part_scale(vita_texture->tex, dstrect->x, dstrect->y,
+            srcrect->x, srcrect->y, srcrect->w, srcrect->h, scaleX, scaleY, (a << 24) + (b << 16) + (g << 8) + r);
 	}
 
 	return 0;
@@ -495,7 +512,10 @@ VITA_RenderReadPixels(SDL_Renderer *renderer, const SDL_Rect *rect,
 					Uint32 pixel_format, void *pixels, int pitch)
 
 {
-		return 0;
+#ifdef SDL_VITA_UNIMPLEMENTED_LOGS
+    printf("SDL ERROR : VITA_RenderReadPixels not implemented \n");
+#endif
+    return 0;
 }
 
 
@@ -592,7 +612,10 @@ VITA_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture,
 
 	if(alpha != 255)
 		sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
-	return 0;*/
+    return 0;*/
+#ifdef SDL_VITA_UNIMPLEMENTED_LOGS
+    printf("SDL ERROR : VITA_RenderCopyEx not implemented \n");
+#endif
 	return 1;
 }
 
